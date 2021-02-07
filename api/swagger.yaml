@@ -1,0 +1,293 @@
+---
+swagger: "2.0"
+info:
+  description: "API for Leaderboard"
+  version: "1.0.0"
+  title: "Leaderboard API"
+  termsOfService: "https://claudiolau.netlify.app/about/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "virtserver.swaggerhub.com"
+basePath: "/claudiolau/Leaderboard/1.0.0"
+schemes:
+- "https"
+consumes:
+- "application/json"
+- "multipart/form-data"
+produces:
+- "application/json"
+security:
+- bearerToken: []
+paths:
+  /health:
+    get:
+      operationId: "getHealth"
+      parameters: []
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Success"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+  /competitions:
+    get:
+      summary: "Return a list of competitions."
+      description: "Every inactive competion has been filtered.\n"
+      operationId: "getCompetitions"
+      parameters: []
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Competitions"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+  /competitions/{competitionId}/agreement:
+    post:
+      summary: "Accept the competition terms of use."
+      description: "User must accept each competition terms of use.\n"
+      operationId: "postCompetitionAgreement"
+      parameters:
+      - name: "competitionId"
+        in: "path"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Success"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+  /competitions/{competitionId}/files:
+    get:
+      summary: "Return a list of the competition files."
+      operationId: "getCompetitionFiles"
+      parameters:
+      - name: "competitionId"
+        in: "path"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Files"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+    post:
+      summary: "Return a list of file urls."
+      operationId: "postCompetitionFiles"
+      parameters:
+      - name: "competitionId"
+        in: "path"
+        description: "Competition Identifier"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Downloads"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+  /competitions/{competitionId}/data/{fileId}:
+    post:
+      summary: "Return a file url."
+      operationId: "postCompetitionFile"
+      parameters:
+      - name: "competitionId"
+        in: "path"
+        required: true
+        type: "integer"
+      - name: "fileId"
+        in: "path"
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Download"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+  /competitions/{competitionId}/submission:
+    post:
+      summary: "Submit file to the competition."
+      description: "Submit file relative to competition"
+      operationId: "postCompetitionSubmit"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "competitionId"
+        in: "path"
+        required: true
+        type: "string"
+        format: "uri"
+      - name: "submission-file"
+        in: "formData"
+        required: true
+        type: "file"
+      - name: "submission-analysis"
+        in: "formData"
+        required: true
+        type: "string"
+      - name: "submission-application"
+        in: "formData"
+        required: true
+        type: "string"
+      - name: "submission-note"
+        in: "formData"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+          schema:
+            $ref: "#/definitions/Success"
+        default:
+          description: "Unexpected error."
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Default"
+securityDefinitions:
+  bearerToken:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+definitions:
+  Competition:
+    type: "object"
+    required:
+    - "competitionId"
+    - "title"
+    properties:
+      competitionId:
+        type: "integer"
+      title:
+        type: "string"
+      closing:
+        type: "string"
+        format: "date-time"
+      prize:
+        type: "string"
+      participants:
+        type: "integer"
+  Competitions:
+    type: "array"
+    items:
+      $ref: "#/definitions/Competition"
+    example:
+    - competitionId: 1
+      title: "abc-ai-competition"
+      closing: "2016-08-29T09:12:00.000Z"
+      prize: "$200,00"
+      participants: 100
+    - competitionId: 2
+      title: "car-ai-competition"
+      closing: "2099-12-31T23:59:59.000Z"
+      prize: "Knowledge"
+      participants: 50
+  File:
+    type: "object"
+    properties:
+      fileId:
+        type: "integer"
+      name:
+        type: "string"
+      title:
+        type: "string"
+      size:
+        type: "string"
+      updated:
+        type: "string"
+        format: "date-time"
+  Files:
+    type: "array"
+    items:
+      $ref: "#/definitions/File"
+    example:
+    - fileId: 1
+      name: "train.csv"
+      title: "Sample A"
+      size: "2.3MB"
+      updated: "2019-01-01T12:00:00.000Z"
+    - fileId: 2
+      name: "test.csv"
+      title: "Sample B"
+      size: "2.3MB"
+      updated: "2019-01-02T13:00:00.000Z"
+  Download:
+    type: "object"
+    properties:
+      fileId:
+        type: "integer"
+        example: 1
+      name:
+        type: "string"
+        example: "FL_insurance_sample.csv.zip"
+      url:
+        type: "string"
+        example: "http://spatialkeydocs.s3.amazonaws.com/FL_insurance_sample.csv.zip"
+    example:
+      name: "FL_insurance_sample.csv.zip"
+      url: "http://spatialkeydocs.s3.amazonaws.com/FL_insurance_sample.csv.zip"
+      fileId: 1
+  Downloads:
+    type: "array"
+    items:
+      $ref: "#/definitions/Download"
+    example:
+    - fileId: 1
+      name: "FL_insurance_sample.csv.zip"
+      url: "http://spatialkeydocs.s3.amazonaws.com/FL_insurance_sample.csv.zip"
+    - fileId: 2
+      name: "SampleDatabases.tar.gz"
+      url: "https://s3.amazonaws.com/ryft-public-sample-data/ODBC/SampleDatabases.tar.gz"
+  Success:
+    type: "object"
+    required:
+    - "message"
+    properties:
+      message:
+        type: "string"
+    example:
+      message: "message"
+  Error:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+      message:
+        type: "string"
+      requiredAgreement:
+        type: "object"
+        properties: {}
+      validations:
+        type: "object"
+        properties: {}
